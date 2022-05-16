@@ -14,7 +14,7 @@ const plateCtxKey = "plateContext"
 
 func Router() http.Handler {
 	m := chi.NewRouter()
-	m.Get("/status", healthCheck)
+	m.Get("/", healthCheck)
 	m.With(validateCollectPlatesRequest()).Post("/v1/plates", collectPlateStates)
 	return m
 }
