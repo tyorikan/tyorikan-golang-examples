@@ -22,7 +22,7 @@ func main() {
 	defer func(firestoreClient *firestore.Client) {
 		err := app.CloseClient(client)
 		if err != nil {
-			app.Logger.Error("Failed to close firestore client", zap.Error(err))
+			app.Logger.Warn("Failed to close firestore client", zap.Error(err))
 		}
 	}(client)
 
