@@ -13,18 +13,19 @@ import (
 const platesCollection = "plates"
 
 type Plate struct {
-	QrID       string
-	ShopNumber int64
-	Hostname   string
-	PopNumber  int16
-	State      int8
+	QrID       string `firestore:"qrId"`
+	ShopNumber int64  `firestore:"shopNumber"`
+	Hostname   string `firestore:"hostname"`
+	PopNumber  int16  `firestore:"popNumber"`
+	State      int8   `firestore:"state"`
 }
 
 type TimelineData struct {
-	Plate      Plate
-	Revision   int8
-	CreateTime time.Time
-	UpdateTime time.Time
+	Plate      Plate     `firestore:"plate"`
+	Revision   int8      `firestore:"revision"`
+	Timestamp  int64     `firestore:"timestamp"`
+	CreateTime time.Time `firestore:"createTime"`
+	UpdateTime time.Time `firestore:"updateTime"`
 }
 
 var FirestoreClient *firestore.Client
@@ -72,6 +73,7 @@ func AddPlateStates(ctx context.Context, plate Plate) (*TimelineData, error) {
 	data := &TimelineData{
 		Plate:      plate,
 		Revision:   0, // Not used
+		Timestamp:  now.Unix(),
 		CreateTime: now,
 		UpdateTime: now,
 	}

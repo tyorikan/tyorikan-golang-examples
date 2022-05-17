@@ -40,6 +40,7 @@ func main() {
 			State:      0,
 		},
 		Revision:   0, // Not used
+		Timestamp:  now.Unix(),
 		CreateTime: now,
 		UpdateTime: now,
 	}
@@ -56,16 +57,17 @@ func main() {
 }
 
 type plate struct {
-	QrID       string
-	ShopNumber int64
-	Hostname   string
-	PopNumber  int16
-	State      int8
+	QrID       string `firestore:"qrId"`
+	ShopNumber int64  `firestore:"shopNumber"`
+	Hostname   string `firestore:"hostname"`
+	PopNumber  int16  `firestore:"popNumber"`
+	State      int8   `firestore:"state"`
 }
 
 type timelineData struct {
-	Plate      plate
-	Revision   int8
-	CreateTime time.Time
-	UpdateTime time.Time
+	Plate      plate     `firestore:"plate"`
+	Revision   int8      `firestore:"revision"`
+	Timestamp  int64     `firestore:"timestamp"`
+	CreateTime time.Time `firestore:"createTime"`
+	UpdateTime time.Time `firestore:"updateTime"`
 }
