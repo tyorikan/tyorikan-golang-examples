@@ -7,16 +7,21 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"go.uber.org/zap"
 )
 
 const plateCtxKey = "plateContext"
 
 func Router() http.Handler {
-	m := chi.NewRouter()
-	m.Get("/", healthCheck)
-	m.With(validateCollectPlatesRequest()).Post("/v1/plates", collectPlateStates)
-	return m
+	r := chi.NewRouter()
+
+	// ログ量を減らしたい場合はアクセスログは無効にしても良いかも
+	r.Use(middleware.Logger)
+
+	r.Get("/", healthCheck)
+	r.With(validateCollectPlatesRequest()).Post("/v1/plates", collectPlateStates)
+	return r
 }
 
 func healthCheck(w http.ResponseWriter, r *http.Request) {
