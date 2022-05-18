@@ -1,4 +1,4 @@
-module github.com/tyorikan/run-firestore-example
+module collect-plate-data
 
 go 1.18
 

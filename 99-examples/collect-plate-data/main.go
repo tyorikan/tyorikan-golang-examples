@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"cloud.google.com/go/firestore"
-	"github.com/tyorikan/run-firestore-example/app"
+	"collect-plate-data/app"
 	"go.uber.org/zap"
 )
 
