@@ -3,13 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
-	"google.golang.org/api/iterator"
 	"log"
 	"os"
 	"strings"
 	"time"
 
 	"cloud.google.com/go/firestore"
+	"google.golang.org/api/iterator"
 )
 
 func main() {
