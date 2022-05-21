@@ -21,7 +21,7 @@ func Router() http.Handler {
 
 	r.Get("/", healthCheck)
 	r.Post("/", loggingEventData)                                          // Eventarc Trigger endpoint
-	r.With(validateUpdatePlatesRequest()).Post("/v1/plates", updatePlates) // QR ID をキーにデータを更新する endpoint
+	r.With(validateUpdatePlatesRequest()).Post("/v1/plates", updatePlates) // QRID / PopNumber をキーにデータを更新する endpoint
 	return r
 }
 

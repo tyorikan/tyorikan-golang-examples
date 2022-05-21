@@ -9,7 +9,11 @@ import (
 	"cloud.google.com/go/firestore"
 )
 
-const collectionPrefix = "plate-states-"
+const plateStateCollectionPrefix = "plate-states-"
+const menuCountCollectionPrefix = "menu-count-"
+const plateDocPrefix = "qrid-"
+const countDocPrefix = "pop-number-"
+
 const openState = 0
 const closeState = 1
 const notDiscard = 0
@@ -59,9 +63,81 @@ func UpdatePlates(ctx context.Context, shopNumber int64, plate PlateStates) (*Pl
 		return nil, fmt.Errorf("firestore client hasn't initialized yet")
 	}
 
-	collectionName := collectionPrefix + strconv.FormatInt(shopNumber, 10)
-	col := FirestoreClient.Collection(collectionName)
-	doc := col.Doc(plate.QrID)
+	plateStateCollectionPath := plateStateCollectionPrefix + strconv.FormatInt(shopNumber, 10)
+	menuCountCollectionPath := menuCountCollectionPrefix + strconv.FormatInt(shopNumber, 10)
+	plateRef := FirestoreClient.Collection(plateStateCollectionPath).Doc(plateDocPrefix + plate.QrID)
+	countRef := FirestoreClient.Collection(menuCountCollectionPath).Doc(countDocPrefix + strconv.FormatInt(int64(plate.PopNumber), 10))
+
+	var data *PlateDocument
+
+	// Plate の state 変化から、提供開始時刻 or 空になった時刻を指定。PopNumber の count up/down
+	err := FirestoreClient.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
+		// 現在の Plate データ取得
+		docSnap, err := tx.Get(plateRef)
+		if docSnap == nil && err != nil {
+			return err
+		}
+
+		// 新規データ
+		if !docSnap.Exists() {
+			data, err = createNewData(ctx, tx, plateRef, countRef, plate)
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+
+		// データ更新
+		data, err = updatePlateData(ctx, tx, plateRef, docSnap, countRef, plate)
+		return err
+	})
+
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func createNewData(ctx context.Context, tx *firestore.Transaction, plateRef *firestore.DocumentRef, countRef *firestore.DocumentRef, plate PlateStates) (*PlateDocument, error) {
+	now := time.Now()
+	data := &PlateDocument{
+		PlateStates: plate,
+		Revision:    0, // Not used
+		UpdateTime:  now,
+		DiscardFlag: notDiscard,
+	}
+	incrementValue := 0
+
+	if plate.State == openState {
+		data.EmptyTimestamp = now.Unix()
+	} else if plate.State == closeState {
+		data.ServedTimestamp = now.Unix()
+		incrementValue = 1
+	}
+
+	err := tx.Create(plateRef, data)
+	if err != nil {
+		return nil, err
+	}
+
+	// 商品（= popNumber）数カウントアップ
+	countData := map[string]interface{}{
+		"count": firestore.Increment(incrementValue),
+	}
+	err = tx.Create(countRef, countData)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
+
+func updatePlateData(ctx context.Context, tx *firestore.Transaction, plateRef *firestore.DocumentRef, docSnap *firestore.DocumentSnapshot, countRef *firestore.DocumentRef, plate PlateStates) (*PlateDocument, error) {
+	var preData PlateDocument
+	err := docSnap.DataTo(&preData)
+	if err != nil {
+		return nil, err
+	}
 
 	now := time.Now()
 	data := &PlateDocument{
@@ -71,49 +147,23 @@ func UpdatePlates(ctx context.Context, shopNumber int64, plate PlateStates) (*Pl
 		DiscardFlag: notDiscard,
 	}
 
-	// 現在のデータ取得
-	docSnap, err := doc.Get(ctx)
-	if docSnap == nil && err != nil {
-		return nil, err
-	}
-
-	// Plate の state 変化から、提供開始時刻 or 空になった時刻を指定
-
-	// 新規データ
-	if !docSnap.Exists() {
-		if plate.State == openState {
-			data.EmptyTimestamp = now.Unix()
-		} else if plate.State == closeState {
-			data.ServedTimestamp = now.Unix()
-		}
-
-		_, err = doc.Create(ctx, data)
-		if err != nil {
-			return nil, err
-		}
-		return data, nil
-	}
-
-	var preData PlateDocument
-	err = docSnap.DataTo(&preData)
-	if err != nil {
-		return nil, err
-	}
-
 	// デフォ以前の状態で上書き
 	data.ServedTimestamp = preData.ServedTimestamp
 	data.EmptyTimestamp = preData.EmptyTimestamp
 	data.DiscardFlag = preData.DiscardFlag
 
 	// 以前の State と、送信されたデータに差異があれば時刻を更新
+	incrementValue := 0
 	if preData.PlateStates.State != plate.State {
 		if plate.State == openState {
 			data.EmptyTimestamp = now.Unix()
 			data.ServedTimestamp = 0
 			data.DiscardFlag = notDiscard
+			incrementValue = -1
 		} else if plate.State == closeState {
 			data.EmptyTimestamp = 0
 			data.ServedTimestamp = now.Unix()
+			incrementValue = 1
 		}
 	}
 
@@ -122,9 +172,18 @@ func UpdatePlates(ctx context.Context, shopNumber int64, plate PlateStates) (*Pl
 		data.DiscardFlag = discard
 	}
 
-	_, err = doc.Set(ctx, data)
+	err = tx.Set(plateRef, data)
 	if err != nil {
 		return nil, err
 	}
+
+	// 商品（= popNumber）数カウントアップ/ダウン
+	err = tx.Update(countRef, []firestore.Update{
+		{Path: "count", Value: firestore.Increment(incrementValue)},
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	return data, nil
 }
