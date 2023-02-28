@@ -1,0 +1,35 @@
+# 環境変数
+
+## TCP で接続する場合
+```
+export INSTANCE_HOST='127.0.0.1'
+export DB_PORT='3306'
+export DB_USER='<DB_USER_NAME>'
+export DB_PASS='<DB_PASSWORD>'
+export DB_NAME='<DB_NAME>'
+```
+
+## Unix Domain Socket で接続する場合
+```
+export INSTANCE_UNIX_SOCKET='/cloudsql/<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>'
+export DB_USER='<YOUR_DB_USER_NAME>'
+export DB_PASS='<YOUR_DB_PASSWORD>'
+export DB_NAME='<YOUR_DB_NAME>'
+```
+
+## 接続名を利用して接続する場合
+```
+export INSTANCE_CONNECTION_NAME='<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>'
+export DB_USER='<YOUR_DB_USER_NAME>'
+export DB_PASS='<YOUR_DB_PASSWORD>'
+export DB_NAME='<YOUR_DB_NAME>'
+PRIVATE_IP='<PRIVATE_IP>' (Optional)
+```
+or
+```
+export INSTANCE_CONNECTION_NAME='<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>'
+export DB_IAM_USER='<SERVICE_ACCOUNT_NAME>'
+export DB_PASS='<YOUR_DB_PASSWORD>'
+export DB_NAME='<YOUR_DB_NAME>'
+PRIVATE_IP='<PRIVATE_IP>' (Optional)
+```
