@@ -28,20 +28,11 @@ steps:
       - >-
         --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID
       - '--region=$_DEPLOY_REGION'
+      - >-
+        --tag=$BRANCH_NAME
       - '--quiet'
-    id: Deploy
-    entrypoint: gcloud
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
-    args:
-      - run
-      - services
-      - update-traffic
-      - $_SERVICE_NAME
-      - '--platform=managed'
-      - '--region=$_DEPLOY_REGION'
-      - '--to-latest'
-      - '--quiet'
-    id: UpdateTraffic
+      - '--no-traffic'
+    id: DeployTag
     entrypoint: gcloud
 images:
   - >-
