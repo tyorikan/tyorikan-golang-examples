@@ -5,6 +5,9 @@ on:
     branches:
       - '**'
 
+permissions:
+  id-token: write
+
 jobs:
   trigger:
     runs-on: ubuntu-latest
