@@ -15,7 +15,7 @@ const (
 	// defaults
 	DefaultEnv      = "dev"
 	DefaultPort     = "8080"
-	DefaultLogLevel = "INFO"
+	DefaultLogLevel = "debug"
 
 	// DefaultLimit defines default number of items in the page
 	DefaultLimit = 10

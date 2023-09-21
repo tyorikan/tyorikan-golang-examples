@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/sirupsen/logrus"
 )
 
 // ProductResources provide products interfaces
@@ -34,5 +35,6 @@ func (rs ProductResources) list(w http.ResponseWriter, r *http.Request) {
 		{ID: 1, Name: "Product 1", Price: 100.0},
 		{ID: 2, Name: "Product 2", Price: 200.0},
 	}
+	logrus.Debug(products)
 	helper.Succeed(w, products)
 }

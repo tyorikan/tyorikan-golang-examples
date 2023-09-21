@@ -58,16 +58,24 @@ func serveRun(cmd *cobra.Command, args []string) {
 
 	// log level
 	lvl := viper.GetString(configs.EnvLogLevel)
-	_, err := logrus.ParseLevel(lvl)
+	level, err := logrus.ParseLevel(lvl)
 	if err != nil {
 		logrus.Fatalln(errors.Errorf("unrecognized config variable: %s\n", lvl))
 	}
+	logrus.SetLevel(level)
 
 	for _, e := range bindEnvironments {
 		if v := viper.GetString(e); v == "" {
 			logrus.Fatalln(errors.Errorf("required " + e + " environment value"))
 		}
 	}
+	logrus.SetFormatter(&logrus.JSONFormatter{
+		FieldMap: logrus.FieldMap{
+			logrus.FieldKeyTime:  "timestamp",
+			logrus.FieldKeyLevel: "severity",
+			logrus.FieldKeyMsg:   "jsonPayload",
+		},
+	})
 
 	startAPIServer(port)
 }

@@ -25,7 +25,7 @@ func (a *App) Router() http.Handler {
 	m.Use(middleware.Compress(5, "gzip"))
 	m.Use(middleware.RealIP)
 	m.Use(middleware.RequestID)
-	m.Use(middleware.Logger)
+	// m.Use(middleware.Logger)
 
 	// status
 	m.Get("/", healthCheck)
