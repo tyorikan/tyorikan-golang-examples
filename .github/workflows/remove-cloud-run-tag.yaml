@@ -20,6 +20,7 @@ jobs:
         with:
           workload_identity_provider: projects/${{ secrets.GCP_PROJECT_ID }}/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-provider
           service_account: ${{ secrets.GCP_SA_ID }}
+          audience: 'https://github.com/tyorikan'
 
       - name: Trigger Cloud Build
         run: |
