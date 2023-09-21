@@ -7,7 +7,7 @@ steps:
       - $_SERVICE_NAME
       - '--platform=managed'
       - '--region=$_DEPLOY_REGION'
-      - '--remove-tags=$BRANCH_NAME'
+      - '--remove-tags=$_BRANCH_NAME'
       - '--quiet'
     id: RemoveCloudRunTag
     entrypoint: gcloud

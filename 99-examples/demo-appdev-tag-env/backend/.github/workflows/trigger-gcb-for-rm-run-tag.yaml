@@ -20,4 +20,4 @@ jobs:
 
       - name: Trigger Cloud Build
         run: |
-          gcloud builds submit --region=asia-northeast1 --config cloudbuild_rm_run_tag.yaml -substitutions=BRANCH_NAME="${{ github.ref }}"
+          gcloud builds submit --region=asia-northeast1 --config cloudbuild_rm_run_tag.yaml -substitutions=_BRANCH_NAME="${{ github.ref }}"
