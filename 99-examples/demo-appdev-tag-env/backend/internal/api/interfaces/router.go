@@ -3,8 +3,8 @@ package interfaces
 import (
 	"net/http"
 
-	"backend/internal/app/interfaces/helper"
-	v1 "backend/internal/app/interfaces/v1/products"
+	"backend/internal/api/interfaces/helper"
+	v1 "backend/internal/api/interfaces/v1/products"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
