@@ -23,4 +23,4 @@ jobs:
 
       - name: Trigger Cloud Build
         run: |
-          gcloud builds submit --region=asia-northeast1 --config ./99-examples/demo-appdev-tag-env/backend/cloudbuild_rm_run_tag.yaml --substitutions=_BRANCH_NAME="${{ github.event.ref }}"
+          gcloud builds triggers run demo-backend-api-remove-cloud-run-tag --region=asia-northeast1 --substitutions=_BRANCH_NAME="${{ github.event.ref }}"
