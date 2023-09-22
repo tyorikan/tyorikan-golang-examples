@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"backend/internal/app/interfaces/helper"
+	"backend/internal/api/interfaces/helper"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"

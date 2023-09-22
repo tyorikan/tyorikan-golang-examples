@@ -1,17 +1,21 @@
-package cmd
+package main
 
 import (
 	"net/http"
 	"strings"
 
 	"backend/configs"
-	"backend/internal/app/interfaces"
+	"backend/internal/api/interfaces"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
+
+func main() {
+	cobra.CheckErr(serveCmd.Execute())
+}
 
 var serveCmd = &cobra.Command{
 	Use:   "api",
@@ -34,8 +38,6 @@ var bindEnvironments = []string{
 }
 
 func init() {
-	rootCmd.AddCommand(serveCmd)
-
 	// set environments
 	viper.SetDefault(configs.Env, configs.DefaultEnv)
 	viper.SetDefault(configs.EnvPort, configs.DefaultPort)
