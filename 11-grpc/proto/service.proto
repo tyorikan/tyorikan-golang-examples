@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package service;
+option go_package = "demo/proto";
+
+// Serviceの定義
+service GreetingService {
+  // サーバーに挨拶を送信し、応答を受け取るRPC
+  rpc SayHello(HelloRequest) returns (HelloResponse) {}
+}
+
+// リクエストメッセージの定義
+message HelloRequest {
+  string name = 1;
+}
+
+// レスポンスメッセージの定義
+message HelloResponse {
+  string message = 1;
+}
