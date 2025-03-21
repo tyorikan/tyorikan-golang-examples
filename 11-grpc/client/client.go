@@ -6,13 +6,16 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	pb "demo/proto"
 
+	"google.golang.org/api/idtoken"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
+	grpcMetadata "google.golang.org/grpc/metadata"
 )
 
 func main() {
@@ -49,6 +52,28 @@ func main() {
 			// TLS認証情報を使用
 			creds := credentials.NewClientTLSFromCert(nil, "")
 			dialOpts = append(dialOpts, grpc.WithTransportCredentials(creds))
+
+			// Create an identity token.
+			audience := serverAddr
+			if strings.Contains(audience, ":") {
+				audience = strings.Split(audience, ":")[0]
+			}
+			audience = "https://" + audience
+			tokenSource, err := idtoken.NewTokenSource(ctx, audience)
+			if err != nil {
+				log.Printf("認証トークンの生成に失敗: %v", err)
+				http.Error(w, fmt.Sprintf("サーバーへの接続に失敗: %v", err), http.StatusInternalServerError)
+				return
+			}
+			token, err := tokenSource.Token()
+			if err != nil {
+				log.Printf("認証トークンの取得に失敗: %v", err)
+				http.Error(w, fmt.Sprintf("サーバーへの接続に失敗: %v", err), http.StatusInternalServerError)
+				return
+			}
+
+			// Add token to gRPC Request.
+			ctx = grpcMetadata.AppendToOutgoingContext(ctx, "authorization", "Bearer "+token.AccessToken)
 		} else {
 			// ローカル開発環境用の設定
 			dialOpts = append(dialOpts, grpc.WithTransportCredentials(insecure.NewCredentials()))
