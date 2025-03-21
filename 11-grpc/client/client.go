@@ -11,6 +11,7 @@ import (
 	pb "demo/proto"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
@@ -27,6 +28,9 @@ func main() {
 		serverAddr = "localhost:8081" // ローカルテスト用のデフォルト値
 	}
 
+	// https 環境かどうかを serverAddr で判断
+	isProduction := !(len(serverAddr) >= 9 && serverAddr[:9] == "localhost")
+
 	// HTTP ハンドラの設定
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		name := r.URL.Query().Get("name")
@@ -34,16 +38,27 @@ func main() {
 			name = "ゲスト"
 		}
 
-		// gRPC クライアント接続の作成
+		// タイムアウト付きのコンテキスト
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
-		conn, err := grpc.DialContext(ctx, serverAddr,
-			grpc.WithTransportCredentials(insecure.NewCredentials()),
-			grpc.WithBlock())
+		var dialOpts []grpc.DialOption
+
+		if isProduction {
+			// Cloud Run環境用の設定
+			// TLS認証情報を使用
+			creds := credentials.NewClientTLSFromCert(nil, "")
+			dialOpts = append(dialOpts, grpc.WithTransportCredentials(creds))
+		} else {
+			// ローカル開発環境用の設定
+			dialOpts = append(dialOpts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		}
+
+		// gRPC サーバーへの接続
+		conn, err := grpc.DialContext(ctx, serverAddr, dialOpts...)
 		if err != nil {
 			log.Printf("サーバーへの接続に失敗: %v", err)
-			http.Error(w, "サーバーへの接続に失敗", http.StatusInternalServerError)
+			http.Error(w, fmt.Sprintf("サーバーへの接続に失敗: %v", err), http.StatusInternalServerError)
 			return
 		}
 		defer conn.Close()
@@ -55,7 +70,7 @@ func main() {
 		resp, err := client.SayHello(ctx, &pb.HelloRequest{Name: name})
 		if err != nil {
 			log.Printf("RPC呼び出しに失敗: %v", err)
-			http.Error(w, "RPC呼び出しに失敗", http.StatusInternalServerError)
+			http.Error(w, fmt.Sprintf("RPC呼び出しに失敗: %v", err), http.StatusInternalServerError)
 			return
 		}
 
