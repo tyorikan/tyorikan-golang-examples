@@ -88,7 +88,15 @@ func main() {
 		}
 		defer conn.Close()
 
-		// クライアントの作成
+		// https://inet-ip.info/ip にアクセスし、自身の IP アドレスを取得する
+		egressIP, err := getEgressIP()
+		if err != nil {
+			log.Printf("IPアドレスの取得に失敗: %v", err)
+			http.Error(w, fmt.Sprintf("IPアドレスの取得に失敗: %v", err), http.StatusInternalServerError)
+			return
+		}
+
+		// gRPC クライアントの作成
 		client := pb.NewGreetingServiceClient(conn)
 
 		// RPC 呼び出し
@@ -99,7 +107,7 @@ func main() {
 			return
 		}
 
-		fmt.Fprintf(w, "サーバーからの応答: %s", resp.GetMessage())
+		fmt.Fprintf(w, "サーバーからの応答: %s\nIP: %s", resp.GetMessage(), egressIP)
 	})
 
 	// HTTPサーバーの起動
@@ -107,4 +115,22 @@ func main() {
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), nil); err != nil {
 		log.Fatalf("HTTPサーバーの起動に失敗: %v", err)
 	}
+}
+
+// インターネットアクセスに使用される IP アドレスを確認する
+func getEgressIP() (string, error) {
+	// https://inet-ip.info/ip にアクセスし、自身の IP アドレスを取得する
+	resp, err := http.Get("https://inet-ip.info/ip")
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	// レスポンスボディを読み込む
+	buf := make([]byte, 32)
+	n, err := resp.Body.Read(buf)
+	if err != nil {
+		return "", err
+	}
+	return string(buf[:n]), nil
 }
