@@ -107,7 +107,7 @@ func main() {
 			return
 		}
 
-		fmt.Fprintf(w, "サーバーからの応答: %s\nIP: %s", resp.GetMessage(), egressIP)
+		fmt.Fprintf(w, "サーバーからの応答: %s\nIP(gRPC client): %s", resp.GetMessage(), egressIP)
 	})
 
 	// HTTPサーバーの起動

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 	"os"
 
 	pb "demo/proto"
@@ -20,7 +21,30 @@ type server struct {
 // SayHello は GreetingService の実装
 func (s *server) SayHello(ctx context.Context, req *pb.HelloRequest) (*pb.HelloResponse, error) {
 	log.Printf("リクエストを受信: %v", req.GetName())
-	return &pb.HelloResponse{Message: fmt.Sprintf("こんにちは, %s!", req.GetName())}, nil
+	// https://inet-ip.info/ip にアクセスし、自身の IP アドレスを取得する
+	egressIP, err := getEgressIP()
+	if err != nil {
+		log.Printf("IPアドレスの取得に失敗: %v", err)
+	}
+	return &pb.HelloResponse{Message: fmt.Sprintf("こんにちは, %s!\nIP(gRPC Server): %s", req.GetName(), egressIP)}, nil
+}
+
+// インターネットアクセスに使用される IP アドレスを確認する
+func getEgressIP() (string, error) {
+	// https://inet-ip.info/ip にアクセスし、自身の IP アドレスを取得する
+	resp, err := http.Get("https://inet-ip.info/ip")
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	// レスポンスボディを読み込む
+	buf := make([]byte, 32)
+	n, err := resp.Body.Read(buf)
+	if err != nil {
+		return "", err
+	}
+	return string(buf[:n]), nil
 }
 
 func main() {
