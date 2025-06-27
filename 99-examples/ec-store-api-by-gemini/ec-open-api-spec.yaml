@@ -1,0 +1,666 @@
+openapi: 3.0.3
+info:
+  title: E-Commerce Store Management API
+  version: v1
+  description: API for managing an e-commerce store, including products, orders, customers, and inventory.
+servers:
+  - url: http://api.example.com/v1
+    description: Production server
+paths:
+  /products:
+    get:
+      summary: List all products
+      description: Retrieves a list of all products, with optional filtering and pagination.
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          description: Maximum number of products to return.
+        - in: query
+          name: offset
+          schema:
+            type: integer
+          description: Offset for pagination.
+        - in: query
+          name: category
+          schema:
+            type: string
+          description: Filter products by category.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+        '500':
+          description: Internal Server Error
+    post:
+      summary: Create a new product
+      description: Creates a new product.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductCreate'
+      responses:
+        '201':
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Bad Request
+        '500':
+          description: Internal Server Error
+  /products/{product_id}:
+    get:
+      summary: Get a product by ID
+      description: Retrieves a specific product by its ID.
+      parameters:
+        - in: path
+          name: product_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID of the product to retrieve.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          description: Product not found
+        '500':
+          description: Internal Server Error
+    put:
+      summary: Update a product
+      description: Updates an existing product.
+      parameters:
+        - in: path
+          name: product_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID of the product to update.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductUpdate'
+      responses:
+        '200':
+          description: Product updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Bad Request
+        '404':
+          description: Product not found
+        '500':
+          description: Internal Server Error
+    delete:
+      summary: Delete a product
+      description: Deletes a product.
+      parameters:
+        - in: path
+          name: product_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID of the product to delete.
+      responses:
+        '204':
+          description: Product deleted
+        '404':
+          description: Product not found
+        '500':
+          description: Internal Server Error
+  /orders:
+    get:
+      summary: List all orders
+      description: Retrieves a list of all orders, with optional filtering and pagination.
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          description: Maximum number of orders to return.
+        - in: query
+          name: offset
+          schema:
+            type: integer
+          description: Offset for pagination.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+        '500':
+          description: Internal Server Error
+    post:
+      summary: Create a new order
+      description: Creates a new order.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderCreate'
+      responses:
+        '201':
+          description: Order created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          description: Bad Request
+        '500':
+          description: Internal Server Error
+  /orders/{order_id}:
+    get:
+      summary: Get an order by ID
+      description: Retrieves a specific order by its ID.
+      parameters:
+        - in: path
+          name: order_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID of the order to retrieve.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '404':
+          description: Order not found
+        '500':
+          description: Internal Server Error
+    put:
+      summary: Update an order
+      description: Updates an existing order.
+      parameters:
+        - in: path
+          name: order_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID of the order to update.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderUpdate'
+      responses:
+        '200':
+          description: Order updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          description: Bad Request
+        '404':
+          description: Order not found
+        '500':
+          description: Internal Server Error
+    delete:
+      summary: Cancel an order
+      description: Cancels an order.
+      parameters:
+        - in: path
+          name: order_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID of the order to cancel.
+      responses:
+        '204':
+          description: Order cancelled
+        '404':
+          description: Order not found
+        '500':
+          description: Internal Server Error
+  /customers:
+    get:
+      summary: List all customers
+      description: Retrieves a list of all customers, with optional filtering and pagination.
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          description: Maximum number of customers to return.
+        - in: query
+          name: offset
+          schema:
+            type: integer
+          description: Offset for pagination.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Customer'
+        '500':
+          description: Internal Server Error
+    post:
+      summary: Create a new customer
+      description: Creates a new customer.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerCreate'
+      responses:
+        '201':
+          description: Customer created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+        '400':
+          description: Bad Request
+        '500':
+          description: Internal Server Error
+  /customers/{customer_id}:
+    get:
+      summary: Get a customer by ID
+      description: Retrieves a specific customer by their ID.
+      parameters:
+        - in: path
+          name: customer_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID of the customer to retrieve.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+        '404':
+          description: Customer not found
+        '500':
+          description: Internal Server Error
+    put:
+      summary: Update a customer
+      description: Updates an existing customer.
+      parameters:
+        - in: path
+          name: customer_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID of the customer to update.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerUpdate'
+      responses:
+        '200':
+          description: Customer updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+        '400':
+          description: Bad Request
+        '404':
+          description: Customer not found
+        '500':
+          description: Internal Server Error
+    delete:
+      summary: Delete a customer
+      description: Deletes a customer.
+      parameters:
+        - in: path
+          name: customer_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID of the customer to delete.
+      responses:
+        '204':
+          description: Customer deleted
+        '404':
+          description: Customer not found
+        '500':
+          description: Internal Server Error
+  /inventory/{product_id}:
+    get:
+      summary: Get inventory by product ID
+      description: Retrieves inventory information for a specific product.
+      parameters:
+        - in: path
+          name: product_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID of the product to get inventory for.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Inventory'
+        '404':
+          description: Inventory not found
+        '500':
+          description: Internal Server Error
+    put:
+      summary: Update inventory
+      description: Updates inventory information for a specific product.
+      parameters:
+        - in: path
+          name: product_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID of the product to update inventory for.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InventoryUpdate'
+      responses:
+        '200':
+          description: Inventory updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Inventory'
+        '400':
+          description: Bad Request
+        '404':
+          description: Inventory not found
+        '500':
+          description: Internal Server Error
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        product_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          format: float
+        currency:
+          type: string
+        image_url:
+          type: string
+          format: URL
+        category:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - product_id
+        - name
+        - price
+        - currency
+    ProductCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          format: float
+        currency:
+          type: string
+        image_url:
+          type: string
+          format: URL
+        category:
+          type: string
+      required:
+        - name
+        - price
+        - currency
+    ProductUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          format: float
+        currency:
+          type: string
+        image_url:
+          type: string
+          format: URL
+        category:
+          type: string
+    Order:
+      type: object
+      properties:
+        order_id:
+          type: string
+          format: uuid
+        customer_id:
+          type: string
+          format: uuid
+        order_date:
+          type: string
+          format: date-time
+        status:
+          type: string
+        total_amount:
+          type: number
+          format: float
+        currency:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+        shipping_address:
+          $ref: '#/components/schemas/Address'
+        billing_address:
+          $ref: '#/components/schemas/Address'
+      required:
+        - order_id
+        - customer_id
+        - order_date
+        - status
+        - total_amount
+        - currency
+        - items
+    OrderCreate:
+      type: object
+      properties:
+        customer_id:
+          type: string
+          format: uuid
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItemCreate'
+        shipping_address:
+          $ref: '#/components/schemas/Address'
+        billing_address:
+          $ref: '#/components/schemas/Address'
+      required:
+        - customer_id
+        - items
+    OrderUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+    OrderItem:
+      type: object
+      properties:
+        product_id:
+          type: string
+          format: uuid
+        quantity:
+          type: integer
+        price:
+          type: number
+          format: float
+      required:
+        - product_id
+        - quantity
+        - price
+    OrderItemCreate:
+      type: object
+      properties:
+        product_id:
+          type: string
+          format: uuid
+        quantity:
+          type: integer
+      required:
+        - product_id
+        - quantity
+    Customer:
+      type: object
+      properties:
+        customer_id:
+          type: string
+          format: uuid
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - customer_id
+        - first_name
+        - last_name
+        - email
+    CustomerCreate:
+      type: object
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+      required:
+        - first_name
+        - last_name
+        - email
+    CustomerUpdate:
+      type: object
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+    Address:
+      type: object
+      properties:
+        street:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zip:
+          type: string
+        country:
+          type: string
+      required:
+        - street
+        - city
+        - state
+        - zip
+        - country
+    Inventory:
+      type: object
+      properties:
+        product_id:
+          type: string
+          format: uuid
+        stock_quantity:
+          type: integer
+        last_updated:
+          type: string
+          format: date-time
+      required:
+        - product_id
+        - stock_quantity
+    InventoryUpdate:
+      type: object
+      properties:
+        stock_quantity:
+          type: integer
+      required:
+        - stock_quantity
